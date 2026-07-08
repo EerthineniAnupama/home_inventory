@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { ImagePlus } from 'lucide-react';
-import * as mediaService from '../services/mediaService.js';
 
 const emptyForm = {
   itemName: '',
@@ -48,20 +47,13 @@ export default function ItemForm({ initialValues = {}, existingImageUrl = null, 
 
     setSubmitting(true);
     try {
-      // Only upload a new image if the user actually picked a new file -
-      // otherwise keep whatever imageUrl the item already had (edit case).
-      let imageUrl = existingImageUrl;
-      if (imageFile) {
-        imageUrl = await mediaService.uploadImage(imageFile);
-      }
-
       const payload = {
         ...form,
         purchasePrice: form.purchasePrice ? Number(form.purchasePrice) : undefined,
-        imageUrl,
+        imageUrl: existingImageUrl,
       };
 
-      await onSubmit(payload);
+      await onSubmit(payload, imageFile);
     } catch (err) {
       setServerError(err.response?.data?.error || 'Something went wrong saving this item.');
     } finally {
