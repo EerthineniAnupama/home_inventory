@@ -9,6 +9,7 @@ const mediaRoutes = require('./routes/media');
 const backupRoutes = require('./routes/backup');
 const authRoutes = require('./routes/auth');
 const inventoryRoutes = require('./routes/inventory');
+const exportRoutes = require('./routes/export'); 
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/media', mediaRoutes);
 app.use('/api/backup', backupRoutes);
 app.use('/api/auth', authRoutes);          // <-- add this
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/export', exportRoutes);
 
 // Basic 404 + error handlers
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));

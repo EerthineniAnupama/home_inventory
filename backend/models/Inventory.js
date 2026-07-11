@@ -17,6 +17,11 @@ const inventorySchema = new mongoose.Schema(
       trim: true,
       default: 'Uncategorized',
     },
+    quantity: {
+      type: Number,
+      default: 1,
+      min: [0, 'Quantity cannot be negative'],
+    },
     description: {
       type: String,
       trim: true,

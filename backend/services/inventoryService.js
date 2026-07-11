@@ -5,6 +5,7 @@ async function createItem(userId, data) {
     user: userId,
     itemName: data.itemName,
     category: data.category,
+    quantity: data.quantity,
     description: data.description,
     purchaseDate: data.purchaseDate,
     purchasePrice: data.purchasePrice,
@@ -47,6 +48,7 @@ async function updateItem(userId, itemId, updates) {
   const allowedFields = [
     'itemName',
     'category',
+    'quantity',
     'description',
     'purchaseDate',
     'purchasePrice',

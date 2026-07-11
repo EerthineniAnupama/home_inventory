@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ItemForm from '../components/ItemForm.jsx';
 import * as inventoryService from '../services/inventoryService.js';
-import * as mediaService from '../services/mediaService.js';
 import Loader from '../components/Loader.jsx';
 
 // Backend stores dates as full ISO strings; <input type="date"> needs "yyyy-MM-dd"
@@ -27,12 +26,7 @@ export default function EditItem() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  async function handleSubmit(payload, imageFile) {
-    if (imageFile) {
-      const imageUrl = await mediaService.uploadImage(imageFile, id);
-      payload.imageUrl = imageUrl;
-    }
-
+  async function handleSubmit(payload) {
     await inventoryService.updateItem(id, payload);
     navigate(`/inventory/${id}`);
   }
@@ -47,6 +41,7 @@ export default function EditItem() {
         initialValues={{
           itemName: item.itemName || '',
           category: item.category || '',
+          quantity: item.quantity ?? 1,
           description: item.description || '',
           purchaseDate: toDateInputValue(item.purchaseDate),
           purchasePrice: item.purchasePrice ?? '',

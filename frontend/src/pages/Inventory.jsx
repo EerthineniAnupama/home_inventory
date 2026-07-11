@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, List as ListIcon, Plus } from 'lucide-react';
+import { LayoutGrid, List as ListIcon, Plus, FileDown, FileText } from 'lucide-react';
 import * as inventoryService from '../services/inventoryService.js';
+import * as exportService from '../services/exportService.js';
 import SearchBar from '../components/SearchBar.jsx';
 import InventoryCard from '../components/InventoryCard.jsx';
 import InventoryTable from '../components/InventoryTable.jsx';
@@ -15,6 +16,7 @@ export default function Inventory() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [view, setView] = useState('grid'); // 'grid' | 'table'
+  const [exporting, setExporting] = useState(null); // 'csv' | 'pdf' | null - tracks which button is busy
 
   useEffect(() => {
     loadItems();
@@ -57,6 +59,18 @@ export default function Inventory() {
     }
   }
 
+  async function handleExport(type) {
+    setExporting(type);
+    try {
+      if (type === 'csv') await exportService.exportInventoryCSV();
+      else await exportService.exportInventoryPDF();
+    } catch {
+      alert('Could not generate the report. Try again.');
+    } finally {
+      setExporting(null);
+    }
+  }
+
   if (loading) return <Loader label="Loading inventory…" />;
   if (error) return <div className="text-sm text-status-danger">{error}</div>;
 
@@ -67,13 +81,31 @@ export default function Inventory() {
           <h1 className="text-xl font-display font-bold text-zinc-900">Inventory</h1>
           <p className="text-sm text-zinc-500 mt-1">{filteredItems.length} of {items.length} items</p>
         </div>
-        <Link
-          to="/inventory/add"
-          className="flex items-center gap-2 rounded-lg bg-accent hover:bg-accent-hover transition-colors text-white text-sm font-medium px-4 py-2"
-        >
-          <Plus size={16} />
-          Add item
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleExport('csv')}
+            disabled={exporting === 'csv'}
+            className="flex items-center gap-2 rounded-lg border border-border bg-surface hover:bg-zinc-50 transition-colors text-sm font-medium px-4 py-2 text-zinc-700 disabled:opacity-60"
+          >
+            <FileDown size={16} />
+            {exporting === 'csv' ? 'Exporting…' : 'Export CSV'}
+          </button>
+          <button
+            onClick={() => handleExport('pdf')}
+            disabled={exporting === 'pdf'}
+            className="flex items-center gap-2 rounded-lg border border-border bg-surface hover:bg-zinc-50 transition-colors text-sm font-medium px-4 py-2 text-zinc-700 disabled:opacity-60"
+          >
+            <FileText size={16} />
+            {exporting === 'pdf' ? 'Exporting…' : 'Export PDF'}
+          </button>
+          <Link
+            to="/inventory/add"
+            className="flex items-center gap-2 rounded-lg bg-accent hover:bg-accent-hover transition-colors text-white text-sm font-medium px-4 py-2"
+          >
+            <Plus size={16} />
+            Add item
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { ImagePlus } from 'lucide-react';
+import * as mediaService from '../services/mediaService.js';
 
 const emptyForm = {
   itemName: '',
   category: '',
+  quantity: 1,
   description: '',
   purchaseDate: '',
   purchasePrice: '',
@@ -47,13 +49,21 @@ export default function ItemForm({ initialValues = {}, existingImageUrl = null, 
 
     setSubmitting(true);
     try {
+      // Only upload a new image if the user actually picked a new file -
+      // otherwise keep whatever imageUrl the item already had (edit case).
+      let imageUrl = existingImageUrl;
+      if (imageFile) {
+        imageUrl = await mediaService.uploadImage(imageFile);
+      }
+
       const payload = {
         ...form,
+        quantity: form.quantity ? Number(form.quantity) : 1,
         purchasePrice: form.purchasePrice ? Number(form.purchasePrice) : undefined,
-        imageUrl: existingImageUrl,
+        imageUrl,
       };
 
-      await onSubmit(payload, imageFile);
+      await onSubmit(payload);
     } catch (err) {
       setServerError(err.response?.data?.error || 'Something went wrong saving this item.');
     } finally {
@@ -81,9 +91,10 @@ export default function ItemForm({ initialValues = {}, existingImageUrl = null, 
         </label>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-3 gap-4">
         <Field label="Item name" name="itemName" value={form.itemName} onChange={handleChange} error={errors.itemName} required />
         <Field label="Category" name="category" value={form.category} onChange={handleChange} placeholder="Electronics, Furniture…" />
+        <Field label="Quantity" name="quantity" type="number" min="0" value={form.quantity} onChange={handleChange} />
       </div>
 
       <div>
